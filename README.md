@@ -154,6 +154,14 @@ specflow.sh purge T20260309-001
 5. 变更日志 (`CHANGELOG.md`)。
 6. Issue 模板和 PR 模板 (`.github/`)。
 7. GitHub 发布清单（`docs/release-checklist-zh.md`）。
+8. 按用户周期使用说明（`docs/usage-cycle-zh.md`）。
+9. 初学者案例（`docs/cases/`）。
+
+## 教学与案例
+
+1. 周期化使用说明：`docs/usage-cycle-zh.md`
+2. Vue + Spring Boot 案例：`docs/cases/vue-springboot-login-refactor.md`
+3. Python 业务修改案例：`docs/cases/python-order-rule-change.md`
 
 ## 发布建议
 

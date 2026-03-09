@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+1. Beginner-oriented lifecycle guide at `docs/usage-cycle-zh.md`.
+2. Two practical case studies under `docs/cases/`:
+   - Vue + Spring Boot login/auth refactor.
+   - Python order discount business rule change.
+
 ## [0.1.0] - 2026-03-09
 
 ### Added
