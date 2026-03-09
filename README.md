@@ -69,6 +69,12 @@ cp -R codex-spec-zh ~/.codex/skills/codex-spec-zh
 
 你发布后可以通过 `skill-installer` 从仓库路径安装。
 
+## 安装后先看这里（案例入口）
+
+1. 周期化使用说明：`docs/usage-cycle-zh.md`
+2. Vue + Spring Boot 案例：`docs/cases/vue-springboot-login-refactor.md`
+3. Python 业务修改案例：`docs/cases/python-order-rule-change.md`
+
 ## 在项目中开始使用
 
 进入你的项目根目录后：
@@ -153,15 +159,8 @@ specflow.sh purge T20260309-001
 4. 安全策略 (`SECURITY.md`)。
 5. 变更日志 (`CHANGELOG.md`)。
 6. Issue 模板和 PR 模板 (`.github/`)。
-7. GitHub 发布清单（`docs/release-checklist-zh.md`）。
-8. 按用户周期使用说明（`docs/usage-cycle-zh.md`）。
-9. 初学者案例（`docs/cases/`）。
-
-## 教学与案例
-
-1. 周期化使用说明：`docs/usage-cycle-zh.md`
-2. Vue + Spring Boot 案例：`docs/cases/vue-springboot-login-refactor.md`
-3. Python 业务修改案例：`docs/cases/python-order-rule-change.md`
+7. 按用户周期使用说明（`docs/usage-cycle-zh.md`）。
+8. 初学者案例（`docs/cases/`）。
 
 ## 发布建议
 

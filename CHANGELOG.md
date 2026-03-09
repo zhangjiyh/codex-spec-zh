@@ -10,6 +10,12 @@ All notable changes to this project will be documented in this file.
    - Vue + Spring Boot login/auth refactor.
    - Python order discount business rule change.
 
+### Changed
+1. Moved case-entry links to the section right after installation in `README.md`.
+
+### Removed
+1. Removed `docs/release-checklist-zh.md` from the public docs set.
+
 ## [0.1.0] - 2026-03-09
 
 ### Added
