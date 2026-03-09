@@ -1,0 +1,3 @@
+interface:
+  display_name: "Codex SpecFlow ZH"
+  short_description: "中文化 spec-plan-progress 长任务执行框架"

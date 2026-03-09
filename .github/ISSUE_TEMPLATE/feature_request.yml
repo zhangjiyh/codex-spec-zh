@@ -1,0 +1,28 @@
+name: Feature Request
+description: Propose an enhancement for codex-spec-zh
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: pain
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe expected behavior and command flow.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: impact
+    attributes:
+      label: Compatibility impact
+      description: Will this break existing workflow or file layout?
