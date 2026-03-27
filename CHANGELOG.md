@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 1. Moved case-entry links to the section right after installation in `README.md`.
+2. New tasks now use Chinese directory names and Chinese task document names by default, while keeping compatibility with legacy English filenames via `localize`.
 
 ### Removed
 1. Removed `docs/release-checklist-zh.md` from the public docs set.

@@ -15,7 +15,24 @@
 ~/.codex/skills/codex-spec-zh/scripts/specflow.sh status
 ```
 
-## 第二步：写 spec.md（示例）
+默认会生成类似这样的目录：
+
+```text
+.codex/specflow/tasks/T20260327-001-登录鉴权改造/
+  meta.yaml
+  任务说明.md
+  执行计划.md
+  进度记录.md
+  验收记录.md
+```
+
+如果你原来已经有旧任务目录，例如 `T20260325-001-task/`，可以先迁移：
+
+```bash
+~/.codex/skills/codex-spec-zh/scripts/specflow.sh localize T20260325-001
+```
+
+## 第二步：写 任务说明.md（示例）
 
 可以填写成：
 1. 目标：登录成功返回 JWT；前端保存 token；接口统一鉴权。
@@ -26,7 +43,7 @@
 - token 失效时自动跳回登录页。
 - 受保护接口未带 token 返回 401。
 
-## 第三步：写 plan.md（示例 Step）
+## 第三步：写 执行计划.md（示例 Step）
 
 1. Step 1：后端登录接口返回 JWT。
 2. Step 2：后端鉴权过滤器拦截受保护接口。
@@ -36,10 +53,11 @@
 
 ## 第四步：按 step 执行并记录
 
-每做一步都在 `progress.md` 记录：
+每做一步都在 `进度记录.md` 记录：
 1. 改动前目标与边界。
 2. 实际修改文件。
 3. 验证命令与结果。
+4. 与计划差异和下一步动作。
 
 ### 示例验证命令
 
@@ -62,8 +80,9 @@ pnpm build
 
 ## 第五步：验收与归档
 
-1. 填写 `acceptance.md`。
-2. 通过后执行：
+1. 填写 `验收记录.md`。
+2. 确认 `status` 里显示的当前任务目录和中文文档路径无误。
+3. 通过后执行：
 
 ```bash
 ~/.codex/skills/codex-spec-zh/scripts/specflow.sh archive <TASK_ID> "JWT 登录改造完成"
@@ -73,4 +92,4 @@ pnpm build
 
 1. 如何拆解前后端联动任务。
 2. 如何避免“一次改太多文件”。
-3. 如何把联调结果沉淀到文档，方便回归。
+3. 如何把联调结果沉淀到中文任务文档，方便回归。

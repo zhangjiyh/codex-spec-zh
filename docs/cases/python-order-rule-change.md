@@ -14,7 +14,24 @@
 ~/.codex/skills/codex-spec-zh/scripts/specflow.sh new "订单折扣规则调整"
 ```
 
-## 第二步：写 spec.md（示例）
+默认会生成类似这样的目录：
+
+```text
+.codex/specflow/tasks/T20260327-001-订单折扣规则调整/
+  meta.yaml
+  任务说明.md
+  执行计划.md
+  进度记录.md
+  验收记录.md
+```
+
+如果你原来已有旧任务目录，例如 `T20260325-001-task/`，可以先执行：
+
+```bash
+~/.codex/skills/codex-spec-zh/scripts/specflow.sh localize T20260325-001
+```
+
+## 第二步：写 任务说明.md（示例）
 
 1. 目标：支持 VIP 与普通用户两套门槛折扣。
 2. 范围：`pricing/service.py` 与对应测试。
@@ -24,7 +41,7 @@
 - 普通用户 100 元以上按 9 折。
 - 所有订单最终金额 >= 0。
 
-## 第三步：写 plan.md（示例 Step）
+## 第三步：写 执行计划.md（示例 Step）
 
 1. Step 1：新增或重构折扣计算函数。
 2. Step 2：补齐单元测试（VIP/普通/边界值）。
@@ -32,6 +49,8 @@
 4. Step 4：更新验收报告。
 
 ## 第四步：执行与验证
+
+建议先在 `进度记录.md` 写清这一轮准备修改的函数、测试文件和不改边界，再执行命令。
 
 示例命令：
 
@@ -48,7 +67,7 @@ pytest -q
 
 ## 第五步：归档
 
-测试全部通过后：
+测试全部通过，并确认中文任务文档已经补齐后：
 
 ```bash
 ~/.codex/skills/codex-spec-zh/scripts/specflow.sh archive <TASK_ID> "折扣规则已上线"
@@ -58,4 +77,4 @@ pytest -q
 
 1. 如何把业务规则变更拆成可验证步骤。
 2. 如何先定义验收再动代码。
-3. 如何用最小改动实现业务演进。
+3. 如何用最小改动实现业务演进，并把过程沉淀到中文任务文档里。

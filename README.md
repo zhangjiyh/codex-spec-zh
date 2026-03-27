@@ -3,6 +3,13 @@
 面向 Codex 的中文长任务执行 Skill。目标是让中长周期开发任务按固定流程推进：
 `spec -> plan -> step-by-step execution -> verification -> acceptance`。
 
+## 中文版主要体现
+
+1. 任务目录中文化：新任务默认生成 `TYYYYMMDD-001-任务标题/`，不再把中文标题压成英文 slug。
+2. 任务文档中文化：默认使用 `任务说明.md`、`执行计划.md`、`进度记录.md`、`验收记录.md`。
+3. 过程输出中文化：`status`、`list`、索引文件、下一步提示都以中文为主。
+4. 历史任务可平滑迁移：旧的 `spec.md / plan.md / progress.md / acceptance.md` 仍兼容，也可以用 `localize` 迁到中文命名。
+
 这个项目提供两部分：
 1. `codex-spec-zh/`：可安装到 `~/.codex/skills` 的 Skill 本体。
 2. 任务仓库规范与脚本：在任意项目中落地 `.codex/specflow/` 工作流。
@@ -22,7 +29,7 @@
 1. 明确文档落点：所有任务文档固定放在 `<project-root>/.codex/specflow/`。
 2. 多任务管理：支持 `新建/切换/归档/软删除/恢复/永久删除`。
 3. 单步执行约束：一次只做一个步骤，强制每步验证。
-4. 中文输出友好：模板、状态、报告均默认中文。
+4. 中文输出友好：模板、状态、报告、任务目录与任务文档名均默认中文。
 5. 多项目复用：Skill 安装一次，任意项目目录可复用。
 
 ## 目录结构
@@ -100,12 +107,12 @@ cp -R codex-spec-zh ~/.codex/skills/codex-spec-zh
   ACTIVE_TASK
   index.md
   tasks/
-    TYYYYMMDD-001-<slug>/
+    TYYYYMMDD-001-<任务标题>/
       meta.yaml
-      spec.md
-      plan.md
-      progress.md
-      acceptance.md
+      任务说明.md
+      执行计划.md
+      进度记录.md
+      验收记录.md
   archive/
   trash/
 ```
@@ -125,16 +132,24 @@ specflow.sh delete T20260309-001
 # 恢复任务（从 archive 或 trash 恢复到 tasks）
 specflow.sh restore T20260309-001
 
+# 将旧任务迁移为中文目录与中文文档名
+specflow.sh localize T20260309-001
+
 # 永久删除（仅 trash 内任务）
 specflow.sh purge T20260309-001
 ```
 
+说明：
+1. 新建任务默认生成中文目录与中文文档名。
+2. 历史任务仍兼容旧的 `spec.md / plan.md / progress.md / acceptance.md`。
+3. 如需把历史任务一起改成中文命名，可执行 `localize`。
+
 ## 推荐工作流（与 Codex 习惯贴合）
 
-1. 先完善 `spec.md`，确认目标、范围、非目标、验收标准、禁改项。
-2. 再完善 `plan.md`，拆成可执行步骤，每步带 DoD 与验证命令。
-3. 每次只执行一个 Step，执行前后都写入 `progress.md`。
-4. 阶段结束后更新 `acceptance.md` 做验收清单。
+1. 先完善 `任务说明.md`，确认目标、范围、非目标、验收标准、禁改项。
+2. 再完善 `执行计划.md`，拆成可执行步骤，每步带 DoD 与验证命令。
+3. 每次只执行一个 Step，执行前后都写入 `进度记录.md`。
+4. 阶段结束后更新 `验收记录.md` 做验收清单。
 5. 完成后归档任务，保留可追溯记录。
 
 ## Vue + Spring Boot 建议

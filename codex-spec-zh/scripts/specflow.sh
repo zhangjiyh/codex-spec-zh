@@ -26,14 +26,64 @@ sanitize_title() {
   printf '%s' "$raw"
 }
 
-slugify() {
+path_labelify() {
   local input="$*"
-  input="$(printf '%s' "$input" | tr '[:upper:]' '[:lower:]')"
-  input="$(printf '%s' "$input" | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')"
+  input="$(printf '%s' "$input" | tr '\n' ' ' | sed -E 's/[[:space:]]+/ /g; s#[][(){}<>:"/\\|?*]#-#g; s/^-+//; s/-+$//; s/^ //; s/ $//')"
   if [[ -z "$input" ]]; then
     input="task"
   fi
   printf '%s' "$input"
+}
+
+doc_filename() {
+  local kind="$1"
+  case "$kind" in
+    spec) echo "任务说明.md" ;;
+    plan) echo "执行计划.md" ;;
+    progress) echo "进度记录.md" ;;
+    acceptance) echo "验收记录.md" ;;
+    *) error "未知文档类型: $kind" ;;
+  esac
+}
+
+legacy_doc_filename() {
+  local kind="$1"
+  case "$kind" in
+    spec) echo "spec.md" ;;
+    plan) echo "plan.md" ;;
+    progress) echo "progress.md" ;;
+    acceptance) echo "acceptance.md" ;;
+    *) error "未知文档类型: $kind" ;;
+  esac
+}
+
+doc_path() {
+  local dir="$1"
+  local kind="$2"
+  local preferred legacy
+  preferred="$dir/$(doc_filename "$kind")"
+  legacy="$dir/$(legacy_doc_filename "$kind")"
+  if [[ -f "$preferred" ]]; then
+    echo "$preferred"
+  else
+    echo "$legacy"
+  fi
+}
+
+rename_doc_to_cn_if_needed() {
+  local dir="$1"
+  local kind="$2"
+  local preferred legacy
+  preferred="$dir/$(doc_filename "$kind")"
+  legacy="$dir/$(legacy_doc_filename "$kind")"
+
+  if [[ -f "$preferred" && -f "$legacy" ]]; then
+    error "任务目录中同时存在 $preferred 与 $legacy，请先手动处理冲突"
+  fi
+
+  if [[ ! -f "$preferred" && -f "$legacy" ]]; then
+    mv "$legacy" "$preferred"
+  fi
 }
 
 require_init() {
@@ -166,10 +216,10 @@ next_id() {
 
 copy_templates() {
   local target_dir="$1"
-  cp "$SKILL_DIR/references/spec.template.md" "$target_dir/spec.md"
-  cp "$SKILL_DIR/references/plan.template.md" "$target_dir/plan.md"
-  cp "$SKILL_DIR/references/progress.template.md" "$target_dir/progress.md"
-  cp "$SKILL_DIR/references/acceptance.template.md" "$target_dir/acceptance.md"
+  cp "$SKILL_DIR/references/spec.template.md" "$target_dir/$(doc_filename spec)"
+  cp "$SKILL_DIR/references/plan.template.md" "$target_dir/$(doc_filename plan)"
+  cp "$SKILL_DIR/references/progress.template.md" "$target_dir/$(doc_filename progress)"
+  cp "$SKILL_DIR/references/acceptance.template.md" "$target_dir/$(doc_filename acceptance)"
 }
 
 cmd_init() {
@@ -183,12 +233,12 @@ cmd_new() {
   require_init
   [[ $# -ge 1 ]] || error "用法: specflow.sh new <任务标题>"
 
-  local title_raw title id slug task_dir ts
+  local title_raw title id path_label task_dir ts
   title_raw="$*"
   title="$(sanitize_title "$title_raw")"
   id="$(next_id)"
-  slug="$(slugify "$title")"
-  task_dir="$TASKS_DIR/${id}-${slug}"
+  path_label="$(path_labelify "$title")"
+  task_dir="$TASKS_DIR/${id}-${path_label}"
   ts="$(now)"
 
   mkdir -p "$task_dir"
@@ -197,13 +247,14 @@ cmd_new() {
   cat > "$task_dir/meta.yaml" <<META
 id: $id
 title: $title
-slug: $slug
+slug: $path_label
+path_label: $path_label
 status: todo
 project_root: $PROJECT_ROOT
 created_at: $ts
 updated_at: $ts
 current_step: 0
-next_action: 完成 spec.md 与 plan.md
+next_action: 完成 任务说明.md 与 执行计划.md
 archive_reason:
 META
 
@@ -245,10 +296,10 @@ cmd_status() {
   echo "[specflow] 当前步骤: $(meta_get "$meta" "current_step")"
   echo "[specflow] 下一动作: $(meta_get "$meta" "next_action")"
   echo "[specflow] 文档:"
-  echo "  - $dir/spec.md"
-  echo "  - $dir/plan.md"
-  echo "  - $dir/progress.md"
-  echo "  - $dir/acceptance.md"
+  echo "  - $(doc_path "$dir" spec)"
+  echo "  - $(doc_path "$dir" plan)"
+  echo "  - $(doc_path "$dir" progress)"
+  echo "  - $(doc_path "$dir" acceptance)"
 }
 
 cmd_switch() {
@@ -358,6 +409,52 @@ cmd_restore() {
   echo "[specflow] 已恢复任务到 tasks: $id"
 }
 
+cmd_localize() {
+  require_init
+  local id dir base bucket meta title path_label target_dir
+  if [[ $# -eq 1 ]]; then
+    id="$1"
+  else
+    id="$(cat "$ACTIVE_FILE" 2>/dev/null || true)"
+  fi
+  [[ -n "$id" ]] || error "用法: specflow.sh localize [TASK_ID]"
+
+  dir="$(find_task_dir "$id" || true)"
+  [[ -n "$dir" ]] || error "未找到任务: $id"
+
+  rename_doc_to_cn_if_needed "$dir" spec
+  rename_doc_to_cn_if_needed "$dir" plan
+  rename_doc_to_cn_if_needed "$dir" progress
+  rename_doc_to_cn_if_needed "$dir" acceptance
+
+  meta="$dir/meta.yaml"
+  title="$(sanitize_title "$(meta_get "$meta" "title")")"
+  path_label="$(path_labelify "$title")"
+  bucket="$(dirname "$dir")"
+  base="$(basename "$dir")"
+  target_dir="$bucket/${id}-${path_label}"
+
+  meta_set "$meta" "slug" "$path_label"
+  meta_set "$meta" "path_label" "$path_label"
+  meta_set "$meta" "next_action" "完成 任务说明.md 与 执行计划.md"
+  meta_set "$meta" "updated_at" "$(now)"
+
+  if [[ "$dir" != "$target_dir" ]]; then
+    [[ ! -e "$target_dir" ]] || error "目标目录已存在: $target_dir"
+    mv "$dir" "$target_dir"
+    dir="$target_dir"
+  fi
+
+  refresh_index
+  echo "[specflow] 已中文化任务: $id"
+  echo "[specflow] 目录: $dir"
+  echo "[specflow] 文档:"
+  echo "  - $(doc_path "$dir" spec)"
+  echo "  - $(doc_path "$dir" plan)"
+  echo "  - $(doc_path "$dir" progress)"
+  echo "  - $(doc_path "$dir" acceptance)"
+}
+
 cmd_purge() {
   require_init
   [[ $# -eq 1 ]] || error "用法: specflow.sh purge <TASK_ID>"
@@ -382,12 +479,15 @@ SpecFlow 用法:
   specflow.sh archive [TASK_ID] [原因]
   specflow.sh delete [TASK_ID]
   specflow.sh restore <TASK_ID>
+  specflow.sh localize [TASK_ID]
   specflow.sh purge <TASK_ID>
   specflow.sh help
 
 说明:
   - 任务仓库固定在 <project-root>/.codex/specflow/
   - 未提供 TASK_ID 时，archive/delete 默认使用 ACTIVE_TASK
+  - 新建任务默认使用中文目录名与中文文档名
+  - localize 可将旧任务的英文目录/文档名迁移为中文命名
 HELP
 }
 
@@ -404,6 +504,7 @@ main() {
     archive) cmd_archive "$@" ;;
     delete) cmd_delete "$@" ;;
     restore) cmd_restore "$@" ;;
+    localize) cmd_localize "$@" ;;
     purge) cmd_purge "$@" ;;
     help|-h|--help) cmd_help ;;
     *) error "未知命令: $cmd（执行 specflow.sh help 查看用法）" ;;
