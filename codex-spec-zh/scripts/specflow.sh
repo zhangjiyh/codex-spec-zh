@@ -39,8 +39,10 @@ doc_filename() {
   local kind="$1"
   case "$kind" in
     spec) echo "任务说明.md" ;;
+    repo_map) echo "代码库地图.md" ;;
     plan) echo "执行计划.md" ;;
     progress) echo "进度记录.md" ;;
+    verification) echo "验证记录.md" ;;
     acceptance) echo "验收记录.md" ;;
     *) error "未知文档类型: $kind" ;;
   esac
@@ -50,8 +52,10 @@ legacy_doc_filename() {
   local kind="$1"
   case "$kind" in
     spec) echo "spec.md" ;;
+    repo_map) echo "repo-map.md" ;;
     plan) echo "plan.md" ;;
     progress) echo "progress.md" ;;
+    verification) echo "verification.md" ;;
     acceptance) echo "acceptance.md" ;;
     *) error "未知文档类型: $kind" ;;
   esac
@@ -65,8 +69,10 @@ doc_path() {
   legacy="$dir/$(legacy_doc_filename "$kind")"
   if [[ -f "$preferred" ]]; then
     echo "$preferred"
-  else
+  elif [[ -f "$legacy" ]]; then
     echo "$legacy"
+  else
+    echo "$preferred"
   fi
 }
 
@@ -217,8 +223,10 @@ next_id() {
 copy_templates() {
   local target_dir="$1"
   cp "$SKILL_DIR/references/spec.template.md" "$target_dir/$(doc_filename spec)"
+  cp "$SKILL_DIR/references/repo-map.template.md" "$target_dir/$(doc_filename repo_map)"
   cp "$SKILL_DIR/references/plan.template.md" "$target_dir/$(doc_filename plan)"
   cp "$SKILL_DIR/references/progress.template.md" "$target_dir/$(doc_filename progress)"
+  cp "$SKILL_DIR/references/verification.template.md" "$target_dir/$(doc_filename verification)"
   cp "$SKILL_DIR/references/acceptance.template.md" "$target_dir/$(doc_filename acceptance)"
 }
 
@@ -254,7 +262,7 @@ project_root: $PROJECT_ROOT
 created_at: $ts
 updated_at: $ts
 current_step: 0
-next_action: 完成 任务说明.md 与 执行计划.md
+next_action: 完成 任务说明.md、代码库地图.md 与 执行计划.md
 archive_reason:
 META
 
@@ -297,8 +305,10 @@ cmd_status() {
   echo "[specflow] 下一动作: $(meta_get "$meta" "next_action")"
   echo "[specflow] 文档:"
   echo "  - $(doc_path "$dir" spec)"
+  echo "  - $(doc_path "$dir" repo_map)"
   echo "  - $(doc_path "$dir" plan)"
   echo "  - $(doc_path "$dir" progress)"
+  echo "  - $(doc_path "$dir" verification)"
   echo "  - $(doc_path "$dir" acceptance)"
 }
 
@@ -423,8 +433,10 @@ cmd_localize() {
   [[ -n "$dir" ]] || error "未找到任务: $id"
 
   rename_doc_to_cn_if_needed "$dir" spec
+  rename_doc_to_cn_if_needed "$dir" repo_map
   rename_doc_to_cn_if_needed "$dir" plan
   rename_doc_to_cn_if_needed "$dir" progress
+  rename_doc_to_cn_if_needed "$dir" verification
   rename_doc_to_cn_if_needed "$dir" acceptance
 
   meta="$dir/meta.yaml"
@@ -436,7 +448,7 @@ cmd_localize() {
 
   meta_set "$meta" "slug" "$path_label"
   meta_set "$meta" "path_label" "$path_label"
-  meta_set "$meta" "next_action" "完成 任务说明.md 与 执行计划.md"
+  meta_set "$meta" "next_action" "完成 任务说明.md、代码库地图.md 与 执行计划.md"
   meta_set "$meta" "updated_at" "$(now)"
 
   if [[ "$dir" != "$target_dir" ]]; then
@@ -450,8 +462,10 @@ cmd_localize() {
   echo "[specflow] 目录: $dir"
   echo "[specflow] 文档:"
   echo "  - $(doc_path "$dir" spec)"
+  echo "  - $(doc_path "$dir" repo_map)"
   echo "  - $(doc_path "$dir" plan)"
   echo "  - $(doc_path "$dir" progress)"
+  echo "  - $(doc_path "$dir" verification)"
   echo "  - $(doc_path "$dir" acceptance)"
 }
 
@@ -486,8 +500,9 @@ SpecFlow 用法:
 说明:
   - 任务仓库固定在 <project-root>/.codex/specflow/
   - 未提供 TASK_ID 时，archive/delete 默认使用 ACTIVE_TASK
-  - 新建任务默认使用中文目录名与中文文档名
+  - 新建任务默认使用中文目录名与中文文档名，并推荐先补代码库地图与验证记录
   - localize 可将旧任务的英文目录/文档名迁移为中文命名
+  - 可先用 scripts/repo-map.sh 做最小必要扫描
 HELP
 }
 
